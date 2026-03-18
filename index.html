@@ -8,6 +8,22 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    input[type=number] { -moz-appearance: textfield !important; }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none !important;
+      appearance: none !important;
+      margin: 0 !important;
+      display: none !important;
+    }
+    input[type=number] { -moz-appearance: textfield !important; }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none !important;
+      appearance: none !important;
+      margin: 0 !important;
+      display: none !important;
+    }
     :root {
       --bg: #F4F3F0;
       --white: #FFFFFF;
@@ -166,7 +182,10 @@
       border-bottom: 1px solid var(--border);
       overflow-x: auto;
       justify-content: center;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
     }
+    .tabs::-webkit-scrollbar { display: none; }
     .tab {
       padding: 0.65rem 1.2rem;
       font-size: 0.8rem;
@@ -311,6 +330,9 @@
     }
     input[type=number]::-webkit-outer-spin-button,
     input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
     input:focus, textarea:focus, select:focus { border-color: var(--blue); background: var(--white); }
     textarea { resize: vertical; min-height: 76px; }
 
@@ -470,7 +492,7 @@
             <div class="field">
               <label>Read Message by Index</label>
               <div style="display:flex;gap:0.5rem;">
-                <input type="number" id="msgIndex" placeholder="0, 1, 2..." min="0" style="flex:1"/>
+                <input type="text" inputmode="decimal" pattern="[0-9.]*" id="msgIndex" placeholder="0, 1, 2..." min="0" style="flex:1"/>
                 <button class="btn btn-outline btn-sm" onclick="getMessageByIndex()">Fetch</button>
               </div>
             </div>
@@ -513,7 +535,7 @@
             </div>
             <div class="field">
               <label>Total ETH to Split</label>
-              <input type="number" id="splitAmt" placeholder="0.01" step="0.001" min="0.001"/>
+              <input type="text" inputmode="decimal" pattern="[0-9.]*" id="splitAmt" placeholder="0.01" step="0.001" min="0.001"/>
             </div>
             <button class="btn btn-primary" onclick="sendToSplitter()">Split ETH</button>
             <div class="output" id="splitOut"></div>
@@ -562,7 +584,7 @@
             </div>
             <div id="equalField" class="field">
               <label>Amount Per Wallet</label>
-              <input type="number" id="airdropAmountEach" placeholder="1000"/>
+              <input type="text" inputmode="decimal" pattern="[0-9.]*" id="airdropAmountEach" placeholder="1000"/>
             </div>
             <div id="customField" class="field" style="display:none">
               <label>Amounts per Wallet (one per line)</label>
@@ -600,30 +622,30 @@
             <div class="sec">Create a Campaign</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
               <div class="field"><label>Title</label><input type="text" id="cfTitle" placeholder="My Campaign"/></div>
-              <div class="field"><label>Goal (ETH)</label><input type="number" id="cfGoal" placeholder="0.1" step="0.01"/></div>
+              <div class="field"><label>Goal (ETH)</label><input type="text" inputmode="decimal" pattern="[0-9.]*" id="cfGoal" placeholder="0.1" step="0.01"/></div>
             </div>
             <div class="field"><label>Description</label><textarea id="cfDesc" placeholder="What are you raising for?" style="min-height:60px;"></textarea></div>
-            <div class="field"><label>Duration (days, 1–90)</label><input type="number" id="cfDays" placeholder="30" min="1" max="90"/></div>
+            <div class="field"><label>Duration (days, 1–90)</label><input type="text" inputmode="decimal" pattern="[0-9.]*" id="cfDays" placeholder="30" min="1" max="90"/></div>
             <button class="btn btn-primary" onclick="createCampaign()">Launch Campaign</button>
             <div class="output" id="cfCreateOut"></div>
             <div class="divider"></div>
             <div class="sec">Contribute to a Campaign</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
-              <div class="field"><label>Campaign ID</label><input type="number" id="cfContribId" placeholder="1" min="1"/></div>
-              <div class="field"><label>Amount (ETH)</label><input type="number" id="cfContribAmt" placeholder="0.01" step="0.001"/></div>
+              <div class="field"><label>Campaign ID</label><input type="text" inputmode="decimal" pattern="[0-9.]*" id="cfContribId" placeholder="1" min="1"/></div>
+              <div class="field"><label>Amount (ETH)</label><input type="text" inputmode="decimal" pattern="[0-9.]*" id="cfContribAmt" placeholder="0.01" step="0.001"/></div>
             </div>
             <button class="btn btn-primary" onclick="contribute()">Contribute ETH</button>
             <div class="output" id="cfContribOut"></div>
             <div class="divider"></div>
             <div class="sec">Look Up a Campaign</div>
             <div style="display:flex;gap:0.5rem;">
-              <input type="number" id="cfCheckId" placeholder="Campaign ID" min="1" style="flex:1"/>
+              <input type="text" inputmode="decimal" pattern="[0-9.]*" id="cfCheckId" placeholder="Campaign ID" min="1" style="flex:1"/>
               <button class="btn btn-outline btn-sm" onclick="checkCampaign()">Look Up</button>
             </div>
             <div class="output" id="cfCheckOut"></div>
             <div class="divider"></div>
             <div class="sec">Claim Funds or Get Refund</div>
-            <div style="margin-bottom:0.5rem;"><input type="number" id="cfActionId" placeholder="Campaign ID" min="1"/></div>
+            <div style="margin-bottom:0.5rem;"><input type="text" inputmode="decimal" pattern="[0-9.]*" id="cfActionId" placeholder="Campaign ID" min="1"/></div>
             <div class="btn-row">
               <button class="btn btn-success" onclick="claimFunds()">Claim Funds</button>
               <button class="btn btn-outline" onclick="getRefund()">Get Refund</button>
@@ -659,27 +681,27 @@
             <div class="sec">Create a Whitelist</div>
             <div class="field"><label>Name</label><input type="text" id="wlName" placeholder="My NFT Presale"/></div>
             <div class="field"><label>Description</label><input type="text" id="wlDesc" placeholder="Early access for holders"/></div>
-            <div class="field"><label>Max Spots (1–10,000)</label><input type="number" id="wlMax" placeholder="500" min="1" max="10000"/></div>
+            <div class="field"><label>Max Spots (1–10,000)</label><input type="text" inputmode="decimal" pattern="[0-9.]*" id="wlMax" placeholder="500" min="1" max="10000"/></div>
             <button class="btn btn-primary" onclick="createWhitelist()">Create Whitelist</button>
             <div class="output" id="wlCreateOut"></div>
             <div class="divider"></div>
             <div class="sec">Register for a Whitelist</div>
             <div style="display:flex;gap:0.5rem;">
-              <input type="number" id="wlRegId" placeholder="Whitelist ID" min="1" style="flex:1"/>
+              <input type="text" inputmode="decimal" pattern="[0-9.]*" id="wlRegId" placeholder="Whitelist ID" min="1" style="flex:1"/>
               <button class="btn btn-primary btn-sm" onclick="registerWhitelist()">Register Me</button>
             </div>
             <div class="output" id="wlRegOut"></div>
             <div class="divider"></div>
             <div class="sec">Look Up a Whitelist</div>
             <div style="display:flex;gap:0.5rem;">
-              <input type="number" id="wlCheckId" placeholder="Whitelist ID" min="1" style="flex:1"/>
+              <input type="text" inputmode="decimal" pattern="[0-9.]*" id="wlCheckId" placeholder="Whitelist ID" min="1" style="flex:1"/>
               <button class="btn btn-outline btn-sm" onclick="checkWhitelist()">Look Up</button>
             </div>
             <div class="output" id="wlCheckOut"></div>
             <div class="divider"></div>
             <div class="sec">Check If Address is Registered</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.5rem;">
-              <input type="number" id="wlVerifyId" placeholder="Whitelist ID" min="1"/>
+              <input type="text" inputmode="decimal" pattern="[0-9.]*" id="wlVerifyId" placeholder="Whitelist ID" min="1"/>
               <input type="text" id="wlVerifyAddr" placeholder="0x..." style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;"/>
             </div>
             <button class="btn btn-outline" onclick="verifyWhitelist()">Check Registration</button>
@@ -687,7 +709,7 @@
             <div class="divider"></div>
             <div class="sec">Open / Close Your Whitelist</div>
             <div style="display:flex;gap:0.5rem;">
-              <input type="number" id="wlToggleId" placeholder="Whitelist ID" min="1" style="flex:1"/>
+              <input type="text" inputmode="decimal" pattern="[0-9.]*" id="wlToggleId" placeholder="Whitelist ID" min="1" style="flex:1"/>
               <button class="btn btn-success btn-sm" onclick="toggleWhitelist(true)">Open</button>
               <button class="btn btn-outline btn-sm" onclick="toggleWhitelist(false)">Close</button>
             </div>
@@ -758,10 +780,14 @@
 
   // AUTO CONNECT
   window.addEventListener('load', async () => {
+    // Wait for MetaMask to inject
+    await new Promise(r => setTimeout(r, 200));
     if (!window.ethereum) return;
     try {
-      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-      if (accounts.length > 0 && localStorage.getItem('ossyConnected')) await connectWallet(true);
+      if (localStorage.getItem('ossyConnected')) {
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        if (accounts.length > 0) await connectWallet(true);
+      }
     } catch(e) {}
     window.ethereum.on('accountsChanged', (accounts) => {
       if (accounts.length === 0) disconnectWallet();
@@ -835,22 +861,73 @@
   }
 
   // SPLITTER
+  function addSplitRow() {
+    const row = document.createElement('div');
+    row.className = 'split-row';
+    row.style = 'display:grid;grid-template-columns:1fr 80px 32px;gap:0.4rem;margin-bottom:0.5rem;';
+    row.innerHTML = `<input type="text" placeholder="0x... wallet address" style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;"/>
+      <input type="text" inputmode="decimal" pattern="[0-9.]*" placeholder="%" min="1" max="100" style="text-align:center;-webkit-appearance:none;-moz-appearance:textfield;"/>
+      <button onclick="removeSplitRow(this)" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:1rem;color:var(--ink-light);">×</button>`;
+    document.getElementById('splitRows').appendChild(row);
+    updateSplitSummary();
+  }
+
+  function removeSplitRow(btn) {
+    const rows = document.querySelectorAll('.split-row');
+    if (rows.length <= 2) return;
+    btn.parentElement.remove();
+    updateSplitSummary();
+  }
+
+  function updateSplitSummary() {
+    const rows = document.querySelectorAll('.split-row');
+    let total = 0;
+    rows.forEach(row => {
+      const pct = parseFloat(row.querySelectorAll('input')[1].value) || 0;
+      total += pct;
+    });
+    const el = document.getElementById('splitSummary');
+    if (el) {
+      el.textContent = 'Total: ' + total + '% ' + (total === 100 ? '✓' : '(must equal 100%)');
+      el.style.color = total === 100 ? 'var(--success)' : 'var(--error)';
+    }
+  }
+
+  // Add live summary update
+  document.addEventListener('input', e => {
+    if (e.target.closest('.split-row')) updateSplitSummary();
+  });
+
   async function sendToSplitter() {
-    const rRaw = document.getElementById("splitRecipients").value.trim();
-    const sRaw = document.getElementById("splitShares").value.trim();
+    const rows = document.querySelectorAll('.split-row');
     const amt  = document.getElementById("splitAmt").value;
-    if (!rRaw || !sRaw || !amt) return out("splitOut","error","Fill in all fields");
-    const recipients = rRaw.split('\n').map(a => a.trim()).filter(Boolean);
-    const shares = sRaw.split('\n').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
-    if (recipients.length !== shares.length) return out("splitOut","error","Recipients and shares count must match");
-    const total = shares.reduce((a,b) => a+b, 0);
-    if (total !== 10000) return out("splitOut","error","Shares must total exactly 10000 (currently " + total + ")");
+    if (!amt) return out("splitOut","error","Enter ETH amount");
+
+    const recipients = [];
+    const shares = [];
+    let totalPct = 0;
+
+    rows.forEach(row => {
+      const inputs = row.querySelectorAll('input');
+      const addr = inputs[0].value.trim();
+      const pct  = parseFloat(inputs[1].value) || 0;
+      if (addr && pct > 0) {
+        recipients.push(addr);
+        shares.push(Math.round(pct * 100)); // convert % to basis points
+        totalPct += pct;
+      }
+    });
+
+    if (recipients.length < 2) return out("splitOut","error","Add at least 2 recipients");
+    if (Math.abs(totalPct - 100) > 0.01) return out("splitOut","error","Percentages must add up to 100% (currently " + totalPct + "%)");
+
     try {
-      out("splitOut","info","Splitting ETH...");
+      out("splitOut","info","Splitting " + amt + " ETH between " + recipients.length + " wallets...");
       const tx = await new ethers.Contract(ADDR.splitter, ABI.splitter, signer).splitPayment(recipients, shares, { value: ethers.parseEther(amt) });
       out("splitOut","info","Confirming...");
       await tx.wait();
-      out("splitOut","success",amt + " ETH split between " + recipients.length + " wallets!\nTx: " + tx.hash);
+      const summary = recipients.map((r,i) => r.slice(0,6)+"..."+r.slice(-4) + " → " + (shares[i]/100) + "%").join("\n");
+      out("splitOut","success",amt + " ETH split!\n\n" + summary + "\n\nTx: " + tx.hash);
     } catch(e) { out("splitOut","error", e.reason || e.message); }
   }
 
