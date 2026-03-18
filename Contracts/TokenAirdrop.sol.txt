@@ -1,0 +1,103 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
+interface IERC20 {
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+    function allowance(address owner, address spender) external view returns (uint256);
+    function balanceOf(address account) external view returns (uint256);
+    function decimals() external view returns (uint8);
+    function symbol() external view returns (string memory);
+}
+
+contract TokenAirdrop {
+
+    event AirdropSent(
+        address indexed token,
+        address indexed sender,
+        uint256 totalRecipients,
+        uint256 totalAmount
+    );
+
+    // Airdrop equal amount to all recipients
+    // Works with ANY ERC-20 token
+    // Caller must approve this contract first
+    function airdropEqual(
+        address token,
+        address[] calldata recipients,
+        uint256 amountEach
+    ) external {
+        require(token != address(0), "Invalid token");
+        require(recipients.length > 0, "No recipients");
+        require(recipients.length <= 200, "Max 200 recipients");
+        require(amountEach > 0, "Amount must be > 0");
+
+        IERC20 erc20 = IERC20(token);
+        uint256 totalAmount = amountEach * recipients.length;
+
+        require(
+            erc20.allowance(msg.sender, address(this)) >= totalAmount,
+            "Approve this contract first"
+        );
+        require(
+            erc20.balanceOf(msg.sender) >= totalAmount,
+            "Insufficient token balance"
+        );
+
+        for (uint256 i = 0; i < recipients.length; i++) {
+            require(recipients[i] != address(0), "Invalid recipient address");
+            require(recipients[i] != msg.sender, "Cannot airdrop to yourself");
+            bool sent = erc20.transferFrom(msg.sender, recipients[i], amountEach);
+            require(sent, "Transfer failed");
+        }
+
+        emit AirdropSent(token, msg.sender, recipients.length, totalAmount);
+    }
+
+    // Airdrop custom amounts to each recipient
+    // Works with ANY ERC-20 token
+    function airdropCustom(
+        address token,
+        address[] calldata recipients,
+        uint256[] calldata amounts
+    ) external {
+        require(token != address(0), "Invalid token");
+        require(recipients.length > 0, "No recipients");
+        require(recipients.length == amounts.length, "Recipients and amounts mismatch");
+        require(recipients.length <= 200, "Max 200 recipients");
+
+        IERC20 erc20 = IERC20(token);
+
+        uint256 totalAmount = 0;
+        for (uint256 i = 0; i < amounts.length; i++) {
+            require(amounts[i] > 0, "Each amount must be > 0");
+            totalAmount += amounts[i];
+        }
+
+        require(
+            erc20.allowance(msg.sender, address(this)) >= totalAmount,
+            "Approve this contract first"
+        );
+        require(
+            erc20.balanceOf(msg.sender) >= totalAmount,
+            "Insufficient token balance"
+        );
+
+        for (uint256 i = 0; i < recipients.length; i++) {
+            require(recipients[i] != address(0), "Invalid recipient address");
+            bool sent = erc20.transferFrom(msg.sender, recipients[i], amounts[i]);
+            require(sent, "Transfer failed");
+        }
+
+        emit AirdropSent(token, msg.sender, recipients.length, totalAmount);
+    }
+
+    // Check how much allowance a user has given this contract for a token
+    function checkAllowance(address token, address user) external view returns (uint256) {
+        return IERC20(token).allowance(user, address(this));
+    }
+
+    // Check token balance of any address
+    function checkBalance(address token, address user) external view returns (uint256) {
+        return IERC20(token).balanceOf(user);
+    }
+}
