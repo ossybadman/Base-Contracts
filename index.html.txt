@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Base Contracts</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #F4F3F0;
+      --white: #FFFFFF;
+      --ink: #0A0A0A;
+      --ink-mid: #555;
+      --ink-light: #999;
+      --blue: #0052FF;
+      --blue-dark: #003ED4;
+      --blue-light: #EBF0FF;
+      --success: #059669;
+      --error: #DC2626;
+      --border: #E2E1DC;
+      --shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.05);
+      --shadow-hover: 0 6px 20px rgba(0,82,255,0.1), 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    html, body { height: 100%; }
+    body {
+      font-family: 'Cabinet Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HEADER */
+    header {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .logo {
+      font-size: 0.95rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .logo:hover { color: var(--blue); }
+
+    .base-logo {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .header-right { display: flex; align-items: center; gap: 0.6rem; }
+
+    .network-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: var(--blue-light);
+      color: var(--blue);
+      padding: 0.22rem 0.6rem;
+      border-radius: 100px;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .npd { width: 5px; height: 5px; background: var(--blue); border-radius: 50%; animation: blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .wallet-pill {
+      display: none;
+      align-items: center;
+      gap: 0.45rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 0.28rem 0.75rem;
+      border-radius: 100px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--ink-mid);
+    }
+    .wallet-eth { font-weight: 500; color: var(--ink); }
+    .wdiv { width: 1px; height: 11px; background: var(--border); }
+
+    .connect-btn {
+      background: var(--blue);
+      color: var(--white);
+      border: none;
+      padding: 0.42rem 1rem;
+      border-radius: 6px;
+      font-family: 'Cabinet Grotesk', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .connect-btn:hover { background: var(--blue-dark); transform: translateY(-1px); }
+    .connect-btn.connected { background: var(--ink); }
+    .connect-btn.connected:hover { background: #333; }
+
+    /* MAIN CONTENT WRAPPER */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HERO */
+    .hero {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 4rem 2rem 2rem;
+      animation: fadeUp 0.5s ease both;
+      text-align: center;
+    }
+    .hero-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 1rem;
+    }
+    .hero-tag::before { content: '// '; opacity: 0.4; }
+    .hero h1 {
+      font-size: clamp(3rem, 6vw, 5rem);
+      font-weight: 900;
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      margin-bottom: 1rem;
+    }
+    .hero h1 .blue { color: var(--blue); }
+    .hero-sub { color: var(--ink-light); font-size: 0.95rem; font-weight: 500; }
+
+    /* TABS */
+    .tabs-wrap {
+      width: 100%;
+      max-width: 900px;
+      margin: 2.5rem auto 0;
+      padding: 0 2rem;
+    }
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      justify-content: center;
+    }
+    .tab {
+      padding: 0.65rem 1.2rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--ink-light);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+      white-space: nowrap;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      font-family: 'Cabinet Grotesk', sans-serif;
+      margin-bottom: -1px;
+    }
+    .tab:hover { color: var(--ink); }
+    .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+    /* PANELS */
+    .panels-wrap {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      flex: 1;
+    }
+    .panel { display: none; animation: fadeUp 0.3s ease; }
+    .panel.active { display: flex; flex-direction: column; align-items: center; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+    /* CARD */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: box-shadow 0.25s, transform 0.25s, border-color 0.25s;
+      width: 100%;
+      max-width: 560px;
+    }
+    .card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); border-color: rgba(0,82,255,0.15); }
+    .card-wide { max-width: 100%; }
+
+    .card-header {
+      padding: 1.4rem 1.4rem 1.1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .card-title { font-size: 1.3rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 0.2rem; }
+    .card-sub { font-size: 0.72rem; color: var(--ink-light); font-weight: 500; }
+    .card-addr-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.65rem; flex-wrap: wrap; }
+
+    .card-addr {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--ink-light);
+      background: var(--bg);
+      padding: 0.22rem 0.55rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      user-select: none;
+    }
+    .card-addr:hover { background: var(--blue-light); color: var(--blue); border-color: var(--blue); }
+
+    /* COPY ICON SVG */
+    .copy-icon { width: 11px; height: 11px; flex-shrink: 0; opacity: 0.6; }
+
+    .basescan-link {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--blue);
+      background: var(--blue-light);
+      padding: 0.22rem 0.55rem;
+      border-radius: 4px;
+      text-decoration: none;
+      border: 1px solid rgba(0,82,255,0.2);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.15s;
+    }
+    .basescan-link:hover { background: var(--blue); color: var(--white); }
+
+    .card-icon { width: 40px; height: 40px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; }
+    .card-body { padding: 1.4rem; }
+
+    /* CONNECT PROMPT */
+    .not-connected {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: var(--ink-light);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+    .not-connected:hover { color: var(--blue); }
+    .not-connected .connect-prompt-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.75rem;
+      background: var(--blue);
+      color: var(--white);
+      padding: 0.5rem 1.2rem;
+      border-radius: 6px;
+      font-family: 'Cabinet Grotesk', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .not-connected .connect-prompt-btn:hover { background: var(--blue-dark); transform: translateY(-1px); }
+
+    /* FORM */
+    .field { margin-bottom: 0.9rem; }
+    label { display: block; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-light); margin-bottom: 0.35rem; }
+    input, textarea, select {
+      width: 100%;
+      padding: 0.58rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: 'Cabinet Grotesk', sans-serif;
+      font-size: 0.875rem;
+      background: var(--bg);
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+      font-weight: 500;
+      -moz-appearance: textfield;
+    }
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input:focus, textarea:focus, select:focus { border-color: var(--blue); background: var(--white); }
+    textarea { resize: vertical; min-height: 76px; }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.58rem 1.1rem;
+      border-radius: 6px;
+      font-family: 'Cabinet Grotesk', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: none;
+      width: 100%;
+    }
+    .btn-primary { background: var(--blue); color: var(--white); }
+    .btn-primary:hover { background: var(--blue-dark); transform: translateY(-1px); }
+    .btn-outline { background: transparent; color: var(--ink); border: 1.5px solid var(--border); }
+    .btn-outline:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-light); }
+    .btn-success { background: var(--success); color: var(--white); }
+    .btn-success:hover { background: #047857; }
+    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .btn-sm { width: auto; padding: 0.52rem 0.9rem; font-size: 0.76rem; }
+
+    .sec { font-weight: 800; font-size: 0.88rem; letter-spacing: -0.01em; margin-bottom: 0.8rem; }
+    .divider { height: 1px; background: var(--border); margin: 1.2rem 0; }
+    .hint { font-size: 0.72rem; color: var(--ink-light); margin-bottom: 0.9rem; line-height: 1.6; font-weight: 500; }
+
+    .output {
+      margin-top: 0.9rem;
+      padding: 0.8rem 1rem;
+      border-radius: 7px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      line-height: 1.65;
+      display: none;
+      word-break: break-all;
+      white-space: pre-wrap;
+    }
+    .output.success { background: #ECFDF5; color: var(--success); border: 1px solid #A7F3D0; }
+    .output.error   { background: #FEF2F2; color: var(--error);   border: 1px solid #FECACA; }
+    .output.info    { background: var(--blue-light); color: var(--blue); border: 1px solid #BFDBFE; }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 1.5rem 2rem;
+      color: var(--ink-light);
+      font-size: 0.68rem;
+      font-family: 'JetBrains Mono', monospace;
+      border-top: 1px solid var(--border);
+      background: var(--white);
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
+    }
+    footer a { color: var(--blue); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .hero { padding: 2.5rem 1rem 1.5rem; }
+      .panels-wrap { padding: 1.25rem 1rem; }
+      .tabs-wrap { padding: 0 1rem; }
+      .card, .card-wide { max-width: 100%; }
+      header { padding: 0 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a class="logo" href="javascript:location.reload()">
+    <svg class="base-logo" viewBox="0 0 1280 1280" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#0052FF" d="M0,101.12c0-34.64,0-51.95,6.53-65.28,6.25-12.76,16.56-23.07,29.32-29.32C49.17,0,66.48,0,101.12,0h1077.76c34.63,0,51.96,0,65.28,6.53,12.75,6.25,23.06,16.56,29.32,29.32,6.52,13.32,6.52,30.64,6.52,65.28v1077.76c0,34.63,0,51.96-6.52,65.28-6.26,12.75-16.57,23.06-29.32,29.32-13.32,6.52-30.65,6.52-65.28,6.52H101.12c-34.64,0-51.95,0-65.28-6.52-12.76-6.26-23.07-16.57-29.32-29.32-6.53-13.32-6.53-30.65-6.53-65.28V101.12Z"/>
+    </svg>
+    Base Smart Contracts
+  </a>
+  <div class="header-right">
+    <div class="network-pill"><div class="npd" id="networkDot"></div>Base Mainnet</div>
+    <div class="wallet-pill" id="walletPill">
+      <span class="wallet-eth" id="headerEth">-</span>
+      <div class="wdiv"></div>
+      <span id="headerAddr">-</span>
+    </div>
+    <button class="connect-btn" id="connectBtn" onclick="handleWalletBtn()">Connect Wallet</button>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">On-Chain Dashboard</div>
+    <h1>Base<br/><span class="blue">Contracts</span></h1>
+    <p class="hero-sub">5 smart contracts on Base Mainnet — open for everyone to use.</p>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs-wrap">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('messages',this)">Messages</button>
+      <button class="tab" onclick="switchTab('splitter',this)">Splitter</button>
+      <button class="tab" onclick="switchTab('airdrop',this)">Airdrop</button>
+      <button class="tab" onclick="switchTab('crowdfund',this)">Crowdfund</button>
+      <button class="tab" onclick="switchTab('whitelist',this)">Whitelist</button>
+    </div>
+  </div>
+
+  <!-- PANELS -->
+  <div class="panels-wrap">
+
+    <!-- MESSAGES -->
+    <div class="panel active" id="panel-messages">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Message Storage</div>
+            <div class="card-sub">Store any message on Base permanently</div>
+            <div class="card-addr-row">
+              <span class="card-addr" onclick="copyAddr('0xaB8C3d4DEB0CDC192e8FC89eb8eA04a28d89e750', this)" title="Copy address">
+                0xaB8C...e750
+                <svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              </span>
+              <a class="basescan-link" href="https://basescan.org/address/0xaB8C3d4DEB0CDC192e8FC89eb8eA04a28d89e750" target="_blank">Basescan ↗</a>
+            </div>
+          </div>
+          <div class="card-icon" style="background:#EEF3FF;">💬</div>
+        </div>
+        <div class="card-body">
+          <div id="msgOff" class="not-connected" onclick="connectWallet()">
+            <button class="connect-prompt-btn">Connect Wallet</button>
+          </div>
+          <div id="msgOn" style="display:none">
+            <div class="field">
+              <label>Latest Message</label>
+              <div style="display:flex;gap:0.5rem;">
+                <input type="text" id="latestMsg" readonly placeholder="Click Read..." style="flex:1"/>
+                <button class="btn btn-outline btn-sm" onclick="getLatestMessage()">Read</button>
+              </div>
+            </div>
+            <div class="field">
+              <label>Author</label>
+              <input type="text" id="msgAuthor" readonly placeholder="-" style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;"/>
+            </div>
+            <div class="divider"></div>
+            <div class="field">
+              <label>Write Your Message (max 280 chars)</label>
+              <textarea id="newMsg" placeholder="Write something permanent on Base..." maxlength="280"></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="setMessage()">Store on Blockchain</button>
+            <div class="output" id="msgOut"></div>
+            <div class="divider"></div>
+            <div class="field">
+              <label>Read Message by Index</label>
+              <div style="display:flex;gap:0.5rem;">
+                <input type="number" id="msgIndex" placeholder="0, 1, 2..." min="0" style="flex:1"/>
+                <button class="btn btn-outline btn-sm" onclick="getMessageByIndex()">Fetch</button>
+              </div>
+            </div>
+            <div class="output" id="msgIndexOut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SPLITTER -->
+    <div class="panel" id="panel-splitter">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Payment Splitter</div>
+            <div class="card-sub">Split ETH between any wallets with custom %</div>
+            <div class="card-addr-row">
+              <span class="card-addr" onclick="copyAddr('0x19E06820dE05D182F979Dcde11BE0770e5a02e8d', this)" title="Copy address">
+                0x19E0...2e8d
+                <svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              </span>
+              <a class="basescan-link" href="https://basescan.org/address/0x19E06820dE05D182F979Dcde11BE0770e5a02e8d" target="_blank">Basescan ↗</a>
+            </div>
+          </div>
+          <div class="card-icon" style="background:#FFF7ED;">⚡</div>
+        </div>
+        <div class="card-body">
+          <div id="splitOff" class="not-connected" onclick="connectWallet()">
+            <button class="connect-prompt-btn">Connect Wallet</button>
+          </div>
+          <div id="splitOn" style="display:none">
+            <p class="hint">Shares are in basis points — must total exactly 10000 (100%)<br/>Example: 5000 + 3000 + 2000 = 50% + 30% + 20%</p>
+            <div class="field">
+              <label>Recipients (one address per line)</label>
+              <textarea id="splitRecipients" placeholder="0xAddress1&#10;0xAddress2&#10;0xAddress3" style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;min-height:80px;"></textarea>
+            </div>
+            <div class="field">
+              <label>Shares (one per line, must total 10000)</label>
+              <textarea id="splitShares" placeholder="5000&#10;3000&#10;2000" style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;min-height:80px;"></textarea>
+            </div>
+            <div class="field">
+              <label>Total ETH to Split</label>
+              <input type="number" id="splitAmt" placeholder="0.01" step="0.001" min="0.001"/>
+            </div>
+            <button class="btn btn-primary" onclick="sendToSplitter()">Split ETH</button>
+            <div class="output" id="splitOut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AIRDROP -->
+    <div class="panel" id="panel-airdrop">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Token Airdrop</div>
+            <div class="card-sub">Airdrop any ERC-20 to multiple wallets at once</div>
+            <div class="card-addr-row">
+              <span class="card-addr" onclick="copyAddr('0xd04adEf5Fc324d01DCe887DDbc6275E5dbBa1ff2', this)" title="Copy address">
+                0xd04a...1ff2
+                <svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              </span>
+              <a class="basescan-link" href="https://basescan.org/address/0xd04adEf5Fc324d01DCe887DDbc6275E5dbBa1ff2" target="_blank">Basescan ↗</a>
+            </div>
+          </div>
+          <div class="card-icon" style="background:#F0FDF4;">🪂</div>
+        </div>
+        <div class="card-body">
+          <div id="airdropOff" class="not-connected" onclick="connectWallet()">
+            <button class="connect-prompt-btn">Connect Wallet</button>
+          </div>
+          <div id="airdropOn" style="display:none">
+            <p class="hint">Before airdropping, approve this contract to spend your tokens.<br/>Token contract → approve(0xd04adEf5Fc324d01DCe887DDbc6275E5dbBa1ff2, amount)</p>
+            <div class="field">
+              <label>Token Contract Address (any ERC-20)</label>
+              <input type="text" id="airdropToken" placeholder="0x..." style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;"/>
+            </div>
+            <div class="field">
+              <label>Airdrop Type</label>
+              <select id="airdropType" onchange="toggleAirdropType()">
+                <option value="equal">Equal — same amount to everyone</option>
+                <option value="custom">Custom — different amount per wallet</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Recipients (one address per line)</label>
+              <textarea id="airdropRecipients" placeholder="0xAddress1&#10;0xAddress2&#10;0xAddress3" style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;"></textarea>
+            </div>
+            <div id="equalField" class="field">
+              <label>Amount Per Wallet</label>
+              <input type="number" id="airdropAmountEach" placeholder="1000"/>
+            </div>
+            <div id="customField" class="field" style="display:none">
+              <label>Amounts per Wallet (one per line)</label>
+              <textarea id="airdropAmounts" placeholder="1000&#10;500&#10;250" style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;"></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="doAirdrop()">Send Airdrop</button>
+            <div class="output" id="airdropOut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CROWDFUND -->
+    <div class="panel" id="panel-crowdfund">
+      <div class="card card-wide">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Crowdfund</div>
+            <div class="card-sub">Create campaigns · Raise ETH · Auto-refund if goal not met</div>
+            <div class="card-addr-row">
+              <span class="card-addr" onclick="copyAddr('0x20a26D1a81507e4C81413d5aAf0b44497e551cdf', this)" title="Copy address">
+                0x20a2...1cdf
+                <svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              </span>
+              <a class="basescan-link" href="https://basescan.org/address/0x20a26D1a81507e4C81413d5aAf0b44497e551cdf" target="_blank">Basescan ↗</a>
+            </div>
+          </div>
+          <div class="card-icon" style="background:#FFFBEB;">🎯</div>
+        </div>
+        <div class="card-body">
+          <div id="cfOff" class="not-connected" onclick="connectWallet()">
+            <button class="connect-prompt-btn">Connect Wallet</button>
+          </div>
+          <div id="cfOn" style="display:none">
+            <div class="sec">Create a Campaign</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+              <div class="field"><label>Title</label><input type="text" id="cfTitle" placeholder="My Campaign"/></div>
+              <div class="field"><label>Goal (ETH)</label><input type="number" id="cfGoal" placeholder="0.1" step="0.01"/></div>
+            </div>
+            <div class="field"><label>Description</label><textarea id="cfDesc" placeholder="What are you raising for?" style="min-height:60px;"></textarea></div>
+            <div class="field"><label>Duration (days, 1–90)</label><input type="number" id="cfDays" placeholder="30" min="1" max="90"/></div>
+            <button class="btn btn-primary" onclick="createCampaign()">Launch Campaign</button>
+            <div class="output" id="cfCreateOut"></div>
+            <div class="divider"></div>
+            <div class="sec">Contribute to a Campaign</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+              <div class="field"><label>Campaign ID</label><input type="number" id="cfContribId" placeholder="1" min="1"/></div>
+              <div class="field"><label>Amount (ETH)</label><input type="number" id="cfContribAmt" placeholder="0.01" step="0.001"/></div>
+            </div>
+            <button class="btn btn-primary" onclick="contribute()">Contribute ETH</button>
+            <div class="output" id="cfContribOut"></div>
+            <div class="divider"></div>
+            <div class="sec">Look Up a Campaign</div>
+            <div style="display:flex;gap:0.5rem;">
+              <input type="number" id="cfCheckId" placeholder="Campaign ID" min="1" style="flex:1"/>
+              <button class="btn btn-outline btn-sm" onclick="checkCampaign()">Look Up</button>
+            </div>
+            <div class="output" id="cfCheckOut"></div>
+            <div class="divider"></div>
+            <div class="sec">Claim Funds or Get Refund</div>
+            <div style="margin-bottom:0.5rem;"><input type="number" id="cfActionId" placeholder="Campaign ID" min="1"/></div>
+            <div class="btn-row">
+              <button class="btn btn-success" onclick="claimFunds()">Claim Funds</button>
+              <button class="btn btn-outline" onclick="getRefund()">Get Refund</button>
+            </div>
+            <div class="output" id="cfActionOut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WHITELIST -->
+    <div class="panel" id="panel-whitelist">
+      <div class="card card-wide">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Whitelist Registry</div>
+            <div class="card-sub">Create whitelists for any project · Anyone can register</div>
+            <div class="card-addr-row">
+              <span class="card-addr" onclick="copyAddr('0xBE95052f2bc397d1c022a08AE89f94C833d65429', this)" title="Copy address">
+                0xBE95...5429
+                <svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              </span>
+              <a class="basescan-link" href="https://basescan.org/address/0xBE95052f2bc397d1c022a08AE89f94C833d65429" target="_blank">Basescan ↗</a>
+            </div>
+          </div>
+          <div class="card-icon" style="background:#F5F3FF;">📋</div>
+        </div>
+        <div class="card-body">
+          <div id="wlOff" class="not-connected" onclick="connectWallet()">
+            <button class="connect-prompt-btn">Connect Wallet</button>
+          </div>
+          <div id="wlOn" style="display:none">
+            <div class="sec">Create a Whitelist</div>
+            <div class="field"><label>Name</label><input type="text" id="wlName" placeholder="My NFT Presale"/></div>
+            <div class="field"><label>Description</label><input type="text" id="wlDesc" placeholder="Early access for holders"/></div>
+            <div class="field"><label>Max Spots (1–10,000)</label><input type="number" id="wlMax" placeholder="500" min="1" max="10000"/></div>
+            <button class="btn btn-primary" onclick="createWhitelist()">Create Whitelist</button>
+            <div class="output" id="wlCreateOut"></div>
+            <div class="divider"></div>
+            <div class="sec">Register for a Whitelist</div>
+            <div style="display:flex;gap:0.5rem;">
+              <input type="number" id="wlRegId" placeholder="Whitelist ID" min="1" style="flex:1"/>
+              <button class="btn btn-primary btn-sm" onclick="registerWhitelist()">Register Me</button>
+            </div>
+            <div class="output" id="wlRegOut"></div>
+            <div class="divider"></div>
+            <div class="sec">Look Up a Whitelist</div>
+            <div style="display:flex;gap:0.5rem;">
+              <input type="number" id="wlCheckId" placeholder="Whitelist ID" min="1" style="flex:1"/>
+              <button class="btn btn-outline btn-sm" onclick="checkWhitelist()">Look Up</button>
+            </div>
+            <div class="output" id="wlCheckOut"></div>
+            <div class="divider"></div>
+            <div class="sec">Check If Address is Registered</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.5rem;">
+              <input type="number" id="wlVerifyId" placeholder="Whitelist ID" min="1"/>
+              <input type="text" id="wlVerifyAddr" placeholder="0x..." style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;"/>
+            </div>
+            <button class="btn btn-outline" onclick="verifyWhitelist()">Check Registration</button>
+            <div class="output" id="wlVerifyOut"></div>
+            <div class="divider"></div>
+            <div class="sec">Open / Close Your Whitelist</div>
+            <div style="display:flex;gap:0.5rem;">
+              <input type="number" id="wlToggleId" placeholder="Whitelist ID" min="1" style="flex:1"/>
+              <button class="btn btn-success btn-sm" onclick="toggleWhitelist(true)">Open</button>
+              <button class="btn btn-outline btn-sm" onclick="toggleWhitelist(false)">Close</button>
+            </div>
+            <div class="output" id="wlToggleOut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end panels-wrap -->
+</div><!-- end main -->
+
+<!-- FOOTER -->
+<footer>
+  5 CONTRACTS ON BASE MAINNET &nbsp;·&nbsp; BUILT BY <a href="https://x.com/ossybadman" target="_blank">@OSSYBADMAN</a>
+</footer>
+
+<script>
+  const ADDR = {
+    message:   "0xaB8C3d4DEB0CDC192e8FC89eb8eA04a28d89e750",
+    splitter:  "0x19E06820dE05D182F979Dcde11BE0770e5a02e8d",
+    airdrop:   "0xd04adEf5Fc324d01DCe887DDbc6275E5dbBa1ff2",
+    crowdfund: "0x20a26D1a81507e4C81413d5aAf0b44497e551cdf",
+    whitelist: "0xBE95052f2bc397d1c022a08AE89f94C833d65429"
+  };
+
+  const ABI = {
+    message:   ["function setMessage(string calldata _text)","function getLatestMessage() view returns (address author, string memory text, uint256 timestamp)","function getMessageCount() view returns (uint256)","function getMessage(uint256 index) view returns (address author, string memory text, uint256 timestamp)"],
+    splitter:  ["function splitPayment(address[] calldata recipients, uint256[] calldata shares) payable"],
+    airdrop:   ["function airdropEqual(address token, address[] calldata recipients, uint256 amountEach)","function airdropCustom(address token, address[] calldata recipients, uint256[] calldata amounts)"],
+    erc20:     ["function decimals() view returns (uint8)"],
+    crowdfund: ["function createCampaign(string calldata title, string calldata description, uint256 goalInWei, uint256 durationInDays) returns (uint256)","function contribute(uint256 campaignId) payable","function claimFunds(uint256 campaignId)","function refund(uint256 campaignId)","function getCampaign(uint256 campaignId) view returns (address,string,string,uint256,uint256,uint256,bool,bool,bool)"],
+    whitelist: ["function createWhitelist(string calldata name, string calldata description, uint256 maxSpots) returns (uint256)","function register(uint256 whitelistId)","function setOpen(uint256 whitelistId, bool open)","function checkWhitelisted(uint256 whitelistId, address addr) view returns (bool)","function getWhitelist(uint256 whitelistId) view returns (address,string,string,uint256,uint256,bool,uint256)"]
+  };
+
+  let provider, signer, userAddress, isConnected = false;
+
+  // TABS
+  function switchTab(name, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('panel-' + name).classList.add('active');
+  }
+
+  // WALLET TOGGLE
+  function handleWalletBtn() {
+    if (isConnected) disconnectWallet();
+    else connectWallet();
+  }
+
+  function disconnectWallet() {
+    isConnected = false;
+    provider = null; signer = null; userAddress = null;
+    localStorage.removeItem('ossyConnected');
+    document.getElementById("connectBtn").textContent = "Connect Wallet";
+    document.getElementById("connectBtn").classList.remove("connected");
+    document.getElementById("walletPill").style.display = "none";
+    const dot = document.getElementById("networkDot");
+    if (dot) { dot.style.background = "var(--blue)"; }
+    ["msg","split","airdrop","cf","wl"].forEach(id => {
+      const off = document.getElementById(id + "Off");
+      const on  = document.getElementById(id + "On");
+      if (off) { off.style.display = "block"; }
+      if (on)  { on.style.display  = "none"; }
+    });
+  }
+
+  // AUTO CONNECT
+  window.addEventListener('load', async () => {
+    if (!window.ethereum) return;
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      if (accounts.length > 0 && localStorage.getItem('ossyConnected')) await connectWallet(true);
+    } catch(e) {}
+    window.ethereum.on('accountsChanged', (accounts) => {
+      if (accounts.length === 0) disconnectWallet();
+      else connectWallet(true);
+    });
+    window.ethereum.on('chainChanged', () => location.reload());
+  });
+
+  // CONNECT
+  async function connectWallet(silent = false) {
+    if (!window.ethereum) {
+      alert("MetaMask not detected!\n\nThis page needs to be served over HTTP (not file://).\n\nUpload to GitHub Pages or use a local server:\nnpx serve .");
+      return;
+    }
+    try {
+      provider = new ethers.BrowserProvider(window.ethereum);
+      if (!silent) await provider.send("eth_requestAccounts", []);
+      signer = await provider.getSigner();
+      userAddress = await signer.getAddress();
+      isConnected = true;
+      localStorage.setItem('ossyConnected', '1');
+      const bal = await provider.getBalance(userAddress);
+      document.getElementById("headerEth").textContent = parseFloat(ethers.formatEther(bal)).toFixed(4) + " ETH";
+      document.getElementById("headerAddr").textContent = userAddress.slice(0,6) + "..." + userAddress.slice(-4);
+      document.getElementById("walletPill").style.display = "flex";
+      document.getElementById("connectBtn").textContent = "Disconnect";
+      document.getElementById("connectBtn").classList.add("connected");
+      const dot = document.getElementById("networkDot");
+      if (dot) { dot.style.background = "#00C853"; }
+      ["msg","split","airdrop","cf","wl"].forEach(id => {
+        const off = document.getElementById(id + "Off");
+        const on  = document.getElementById(id + "On");
+        if (off) off.style.display = "none";
+        if (on)  on.style.display  = "block";
+      });
+    } catch(e) { if (!silent) alert("Connection failed: " + e.message); }
+  }
+
+  // MESSAGE
+  async function getLatestMessage() {
+    try {
+      const c = new ethers.Contract(ADDR.message, ABI.message, provider);
+      const [author, text] = await c.getLatestMessage();
+      document.getElementById("latestMsg").value = text;
+      document.getElementById("msgAuthor").value = author;
+    } catch(e) { document.getElementById("latestMsg").placeholder = "No messages yet"; }
+  }
+
+  async function setMessage() {
+    const msg = document.getElementById("newMsg").value.trim();
+    if (!msg) return out("msgOut","error","Enter a message first");
+    try {
+      out("msgOut","info","Storing on Base...");
+      const tx = await new ethers.Contract(ADDR.message, ABI.message, signer).setMessage(msg);
+      out("msgOut","info","Confirming...");
+      await tx.wait();
+      document.getElementById("newMsg").value = "";
+      await getLatestMessage();
+      out("msgOut","success","Stored on Base!\nTx: " + tx.hash);
+    } catch(e) { out("msgOut","error", e.reason || e.message); }
+  }
+
+  async function getMessageByIndex() {
+    const idx = document.getElementById("msgIndex").value;
+    if (idx === "") return out("msgIndexOut","error","Enter an index number");
+    try {
+      const c = new ethers.Contract(ADDR.message, ABI.message, provider);
+      const [author, text, ts] = await c.getMessage(idx);
+      out("msgIndexOut","success","Message #" + idx + ":\n\"" + text + "\"\n\nBy: " + author + "\nAt: " + new Date(Number(ts)*1000).toLocaleString());
+    } catch(e) { out("msgIndexOut","error","No message at index " + idx); }
+  }
+
+  // SPLITTER
+  async function sendToSplitter() {
+    const rRaw = document.getElementById("splitRecipients").value.trim();
+    const sRaw = document.getElementById("splitShares").value.trim();
+    const amt  = document.getElementById("splitAmt").value;
+    if (!rRaw || !sRaw || !amt) return out("splitOut","error","Fill in all fields");
+    const recipients = rRaw.split('\n').map(a => a.trim()).filter(Boolean);
+    const shares = sRaw.split('\n').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+    if (recipients.length !== shares.length) return out("splitOut","error","Recipients and shares count must match");
+    const total = shares.reduce((a,b) => a+b, 0);
+    if (total !== 10000) return out("splitOut","error","Shares must total exactly 10000 (currently " + total + ")");
+    try {
+      out("splitOut","info","Splitting ETH...");
+      const tx = await new ethers.Contract(ADDR.splitter, ABI.splitter, signer).splitPayment(recipients, shares, { value: ethers.parseEther(amt) });
+      out("splitOut","info","Confirming...");
+      await tx.wait();
+      out("splitOut","success",amt + " ETH split between " + recipients.length + " wallets!\nTx: " + tx.hash);
+    } catch(e) { out("splitOut","error", e.reason || e.message); }
+  }
+
+  // AIRDROP
+  function toggleAirdropType() {
+    const t = document.getElementById("airdropType").value;
+    document.getElementById("equalField").style.display  = t === "equal"  ? "block" : "none";
+    document.getElementById("customField").style.display = t === "custom" ? "block" : "none";
+  }
+
+  async function doAirdrop() {
+    const token = document.getElementById("airdropToken").value.trim();
+    const type  = document.getElementById("airdropType").value;
+    const rRaw  = document.getElementById("airdropRecipients").value.trim();
+    if (!token || !rRaw) return out("airdropOut","error","Fill in token address and recipients");
+    const recipients = rRaw.split('\n').map(a => a.trim()).filter(Boolean);
+    try {
+      const dec = await new ethers.Contract(token, ABI.erc20, provider).decimals();
+      const c   = new ethers.Contract(ADDR.airdrop, ABI.airdrop, signer);
+      if (type === "equal") {
+        const each = document.getElementById("airdropAmountEach").value;
+        if (!each) return out("airdropOut","error","Enter amount per wallet");
+        out("airdropOut","info","Airdropping...");
+        const tx = await c.airdropEqual(token, recipients, ethers.parseUnits(each, dec));
+        await tx.wait();
+        out("airdropOut","success","Airdropped " + each + " tokens to " + recipients.length + " wallets!\nTx: " + tx.hash);
+      } else {
+        const aRaw = document.getElementById("airdropAmounts").value.trim();
+        if (!aRaw) return out("airdropOut","error","Enter amounts");
+        const amounts = aRaw.split('\n').map(a => ethers.parseUnits(a.trim(), dec));
+        out("airdropOut","info","Sending custom airdrop...");
+        const tx = await c.airdropCustom(token, recipients, amounts);
+        await tx.wait();
+        out("airdropOut","success","Custom airdrop sent to " + recipients.length + " wallets!\nTx: " + tx.hash);
+      }
+    } catch(e) { out("airdropOut","error", e.reason || e.message); }
+  }
+
+  // CROWDFUND
+  async function createCampaign() {
+    const title = document.getElementById("cfTitle").value.trim();
+    const desc  = document.getElementById("cfDesc").value.trim();
+    const goal  = document.getElementById("cfGoal").value;
+    const days  = document.getElementById("cfDays").value;
+    if (!title || !goal || !days) return out("cfCreateOut","error","Fill in title, goal and duration");
+    try {
+      out("cfCreateOut","info","Creating campaign...");
+      const tx = await new ethers.Contract(ADDR.crowdfund, ABI.crowdfund, signer).createCampaign(title, desc, ethers.parseEther(goal), parseInt(days));
+      out("cfCreateOut","info","Confirming...");
+      await tx.wait();
+      out("cfCreateOut","success","Campaign launched!\n" + title + " · " + goal + " ETH · " + days + " days\nTx: " + tx.hash);
+      ["cfTitle","cfDesc","cfGoal","cfDays"].forEach(id => document.getElementById(id).value = "");
+    } catch(e) { out("cfCreateOut","error", e.reason || e.message); }
+  }
+
+  async function contribute() {
+    const id  = document.getElementById("cfContribId").value;
+    const amt = document.getElementById("cfContribAmt").value;
+    if (!id || !amt) return out("cfContribOut","error","Enter campaign ID and amount");
+    try {
+      out("cfContribOut","info","Contributing...");
+      const tx = await new ethers.Contract(ADDR.crowdfund, ABI.crowdfund, signer).contribute(parseInt(id), { value: ethers.parseEther(amt) });
+      await tx.wait();
+      out("cfContribOut","success","Contributed " + amt + " ETH to Campaign #" + id + "!\nTx: " + tx.hash);
+    } catch(e) { out("cfContribOut","error", e.reason || e.message); }
+  }
+
+  async function checkCampaign() {
+    const id = document.getElementById("cfCheckId").value;
+    if (!id) return out("cfCheckOut","error","Enter a campaign ID");
+    try {
+      const c = new ethers.Contract(ADDR.crowdfund, ABI.crowdfund, provider);
+      const [creator, title, desc, goal, raised, deadline, claimed, cancelled, goalReached] = await c.getCampaign(parseInt(id));
+      const pct = goal > 0n ? (Number(raised * 100n / goal)).toFixed(1) : "0";
+      out("cfCheckOut","success",
+        "Campaign #" + id + ": " + title + "\n" + desc + "\n\n" +
+        "Goal:     " + ethers.formatEther(goal) + " ETH\n" +
+        "Raised:   " + ethers.formatEther(raised) + " ETH (" + pct + "%)\n" +
+        "Deadline: " + new Date(Number(deadline)*1000).toLocaleString() + "\n" +
+        "Status:   " + (cancelled ? "Cancelled" : claimed ? "Claimed" : goalReached ? "Goal Reached!" : "Active") + "\n" +
+        "Creator:  " + creator
+      );
+    } catch(e) { out("cfCheckOut","error","Campaign #" + id + " not found"); }
+  }
+
+  async function claimFunds() {
+    const id = document.getElementById("cfActionId").value;
+    if (!id) return out("cfActionOut","error","Enter a campaign ID");
+    try {
+      out("cfActionOut","info","Claiming...");
+      const tx = await new ethers.Contract(ADDR.crowdfund, ABI.crowdfund, signer).claimFunds(parseInt(id));
+      await tx.wait();
+      out("cfActionOut","success","Funds claimed from Campaign #" + id + "!\nTx: " + tx.hash);
+    } catch(e) { out("cfActionOut","error", e.reason || e.message); }
+  }
+
+  async function getRefund() {
+    const id = document.getElementById("cfActionId").value;
+    if (!id) return out("cfActionOut","error","Enter a campaign ID");
+    try {
+      out("cfActionOut","info","Requesting refund...");
+      const tx = await new ethers.Contract(ADDR.crowdfund, ABI.crowdfund, signer).refund(parseInt(id));
+      await tx.wait();
+      out("cfActionOut","success","Refund received from Campaign #" + id + "!\nTx: " + tx.hash);
+    } catch(e) { out("cfActionOut","error", e.reason || e.message); }
+  }
+
+  // WHITELIST
+  async function createWhitelist() {
+    const name = document.getElementById("wlName").value.trim();
+    const desc = document.getElementById("wlDesc").value.trim();
+    const max  = document.getElementById("wlMax").value;
+    if (!name || !max) return out("wlCreateOut","error","Name and max spots required");
+    try {
+      out("wlCreateOut","info","Creating...");
+      const tx = await new ethers.Contract(ADDR.whitelist, ABI.whitelist, signer).createWhitelist(name, desc, parseInt(max));
+      out("wlCreateOut","info","Confirming...");
+      await tx.wait();
+      out("wlCreateOut","success","Whitelist created!\n" + name + " · " + max + " spots\nTx: " + tx.hash);
+      ["wlName","wlDesc","wlMax"].forEach(id => document.getElementById(id).value = "");
+    } catch(e) { out("wlCreateOut","error", e.reason || e.message); }
+  }
+
+  async function registerWhitelist() {
+    const id = document.getElementById("wlRegId").value;
+    if (!id) return out("wlRegOut","error","Enter a whitelist ID");
+    try {
+      out("wlRegOut","info","Registering...");
+      const tx = await new ethers.Contract(ADDR.whitelist, ABI.whitelist, signer).register(parseInt(id));
+      out("wlRegOut","info","Confirming...");
+      await tx.wait();
+      out("wlRegOut","success","Registered on Whitelist #" + id + "!\nWallet: " + userAddress + "\nTx: " + tx.hash);
+    } catch(e) { out("wlRegOut","error", e.reason || e.message); }
+  }
+
+  async function checkWhitelist() {
+    const id = document.getElementById("wlCheckId").value;
+    if (!id) return out("wlCheckOut","error","Enter a whitelist ID");
+    try {
+      const c = new ethers.Contract(ADDR.whitelist, ABI.whitelist, provider);
+      const [creator, name, desc, maxSpots, spotsUsed, isOpen, createdAt] = await c.getWhitelist(parseInt(id));
+      out("wlCheckOut","success",
+        "Whitelist #" + id + ": " + name + "\n" + desc + "\n\n" +
+        "Spots:   " + spotsUsed + "/" + maxSpots + " (" + (Number(maxSpots)-Number(spotsUsed)) + " remaining)\n" +
+        "Status:  " + (isOpen ? "Open" : "Closed") + "\n" +
+        "Created: " + new Date(Number(createdAt)*1000).toLocaleString() + "\n" +
+        "Creator: " + creator
+      );
+    } catch(e) { out("wlCheckOut","error","Whitelist #" + id + " not found"); }
+  }
+
+  async function verifyWhitelist() {
+    const id   = document.getElementById("wlVerifyId").value;
+    const addr = document.getElementById("wlVerifyAddr").value.trim();
+    if (!id || !addr) return out("wlVerifyOut","error","Enter whitelist ID and address");
+    try {
+      const result = await new ethers.Contract(ADDR.whitelist, ABI.whitelist, provider).checkWhitelisted(parseInt(id), addr);
+      out("wlVerifyOut", result ? "success" : "error",
+        result ? addr + "\nis registered on Whitelist #" + id : addr + "\nis NOT on Whitelist #" + id
+      );
+    } catch(e) { out("wlVerifyOut","error", e.message); }
+  }
+
+  async function toggleWhitelist(open) {
+    const id = document.getElementById("wlToggleId").value;
+    if (!id) return out("wlToggleOut","error","Enter a whitelist ID");
+    try {
+      out("wlToggleOut","info",(open ? "Opening" : "Closing") + "...");
+      const tx = await new ethers.Contract(ADDR.whitelist, ABI.whitelist, signer).setOpen(parseInt(id), open);
+      await tx.wait();
+      out("wlToggleOut","success","Whitelist #" + id + " is now " + (open ? "open" : "closed") + "\nTx: " + tx.hash);
+    } catch(e) { out("wlToggleOut","error", e.reason || e.message); }
+  }
+
+  // HELPERS
+  function out(id, type, msg) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = "output " + type;
+    el.textContent = msg;
+    el.style.display = "block";
+  }
+
+  function copyAddr(addr, el) {
+    navigator.clipboard.writeText(addr).then(() => {
+      const orig = el.innerHTML;
+      el.innerHTML = `<svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
+      el.style.color = "var(--success)";
+      el.style.borderColor = "var(--success)";
+      el.style.background = "#ECFDF5";
+      setTimeout(() => {
+        el.innerHTML = orig;
+        el.style.color = "";
+        el.style.borderColor = "";
+        el.style.background = "";
+      }, 1500);
+    });
+  }
+</script>
+</body>
+</html>
